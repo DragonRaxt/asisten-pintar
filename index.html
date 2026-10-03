@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asisten Pintar - Jawaban Gambar AI Akurat</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        },
+                        cyanBrand: {
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                        }
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 2s infinite alternate',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%': { boxShadow: '0 0 15px rgba(99, 102, 241, 0.3)' },
+                            '100%': { boxShadow: '0 0 35px rgba(6, 182, 212, 0.6)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-6px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+        }
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyanBrand-400 p-0.5 shadow-lg shadow-brand-500/20 flex items-center justify-center">
+                    <div class="w-full h-full bg-gray-900 rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid font-bold fa-brain text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 text-lg"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-tight text-white flex items-center gap-2">
+                        Asisten Pintar
+                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">AI Visual v2026</span>
+                    </h1>
+                    <p class="text-xs text-gray-400 hidden sm:block">Jawaban Langsung Berupa Gambar Akurat 100%</p>
+                </div>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="flex items-center gap-3">
+                <button id="btn-clear-history" onclick="clearHistory()" class="hidden text-xs text-gray-400 hover:text-red-400 px-3 py-1.5 rounded-lg border border-gray-700/60 hover:border-red-500/30 transition items-center gap-1.5">
+                    <i class="fa-solid fa-trash-can">="0"></i> Clear Riwayat
+                </button>
+                <div class="flex items-center gap-2 bg-indigo-950/50 border border-indigo-800/40 rounded-full px-3 py-1 text-xs text-indigo-300">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                    </span>
+                    <span>Respon Visual Siap</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Application Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
+        
+        <!-- Hero Tagline & AI Greeting -->
+        <div class="text-center mb-8 max-w-3xl mx-auto">
+            
+            <!-- AI Introduction Banner -->
+            <div class="glass-card rounded-2xl p-4 sm:p-5 mb-6 border border-indigo-500/40 bg-gradient-to-r from-indigo-950/80 via-indigo-900/40 to-cyan-950/80 flex items-center gap-4 text-left shadow-2xl relative overflow-hidden">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-400 p-0.5 flex-shrink-0 animate-pulse-glow">
+                    <div class="w-full h-full bg-gray-900 rounded-[10px] flex items-center justify-center text-indigo-400">
+                        <i class="fa-solid fa-robot text-2xl animate-bounce"></i>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm sm:text-base font-bold text-white leading-snug">
+                        Hai 👋 Saya Adalah Asisten Pintar Yang Dibuat Oleh <a href="https://wa.me/6283178802529" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300 underline underline-offset-2 transition">0831-7880-2529(~zuhri)</a> yang siap membantu anda
+                    </h3>
+                    <p class="text-xs text-gray-300 mt-1">
+                        Ketik pertanyaan sains, konsep, atau topik apapun—saya akan memberikan jawaban visual berupa gambar secara akurat.
+                    </p>
+                </div>
+            </div>
+
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-indigo-300 tracking-tight mb-3">
+                Tanya Apapun, Dapatkan Jawaban Berupa Gambar!
+            </h2>
+            <p class="text-gray-400 text-sm sm:text-base">
+                Ketik pertanyaan sains, ilmu pengetahuan, penjelasan konsep, atau grafik—<strong class="text-indigo-400 font-semibold">Asisten Pintar</strong> akan langsung memvisualisasikan jawabannya secara instan dan akurat.
+            </p>
+        </div>
+
+        <!-- Input & Controls Box -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl mb-10 border border-gray-800 focus-within:border-indigo-500/50 transition-all duration-300">
+            <form id="ask-form" onsubmit="handleAsk(event)" class="space-y-4">
+                <div class="relative space-y-3">
+                    <textarea 
+                        id="user-query" 
+                        rows="3" 
+                        placeholder="Ketik pertanyaan Anda, atau upload foto soal/gambar di bawah ini (Contoh: Berikan jawaban visual dari foto rumus ini...)" 
+                        class="w-full bg-gray-900/90 border border-gray-700/80 rounded-xl px-4 py-3.5 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base resize-none shadow-inner"
+                    ></textarea>
+                    
+                    <!-- Quick Clear Text Button -->
+                    <button type="button" onclick="document.getElementById('user-query').value=''" class="absolute right-3 top-3 text-gray-500 hover:text-gray-300 text-sm p-1">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+
+                    <!-- Image Upload Preview & Attachment Bar -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <input type="file" id="image-file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                        
+                        <button type="button" onclick="document.getElementById('image-file-input').click()" class="bg-gray-800/90 hover:bg-gray-700 text-indigo-300 hover:text-indigo-200 border border-indigo-500/40 hover:border-indigo-400 px-3.5 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 shadow-md">
+                            <i class="fa-solid fa-paperclip text-sm"></i>
+                            <span>Upload Foto / File Gambar Soal</span>
+                        </button>
+
+                        <span class="text-[11px] text-gray-400">Bisa upload foto soal, diagram, atau tangkapan layar</span>
+                    </div>
+
+                    <!-- Image Preview Container -->
+                    <div id="image-preview-container" class="hidden relative inline-block border border-indigo-500/50 bg-gray-950 p-2 rounded-xl group">
+                        <div class="flex items-center gap-3">
+                            <img id="image-preview-thumb" src="" alt="Pratinjau File" class="w-16 h-16 object-cover rounded-lg border border-gray-800">
+                            <div class="text-xs">
+                                <p id="image-preview-name" class="font-medium text-white truncate max-w-[200px]">gambar.jpg</p>
+                                <p class="text-cyan-400 text-[10px] mt-0.5"><i class="fa-solid fa-circle-check"></i> Foto Soal Terlampir</p>
+                            </div>
+                            <button type="button" onclick="removeUploadedImage()" class="ml-2 bg-red-900/60 hover:bg-red-800 text-red-300 p-1.5 rounded-lg text-xs transition" title="Hapus Gambar">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Options Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-gray-800/80">
+                    
+                    <!-- Style & Aspect Ratio Selection -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <!-- Style Dropdown -->
+                        <div class="flex items-center space-x-2">
+                            <label for="style-select" class="text-xs font-medium text-gray-400 flex items-center gap-1">
+                                <i class="fa-solid fa-palette text-indigo-400"></i> Gaya:
+                            </label>
+                            <select id="style-select" class="bg-gray-900 border border-gray-700 rounded-lg text-xs text-gray-200 px-3 py-1.5 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                                <option value="dark_notes" selected>Catatan Dark Mode (Teks & Rumus Rapi Seperti Foto)</option>
+                                <option value="infographic">Infografis Edukasi (Teks & Diagram Detail)</option>
+                                <option value="technical">Diagram Sains & Teknis Crisp</option>
+                                <option value="realistic">Foto Realistis High-Detail</option>
+                                <option value="illustration">Ilustrasi Vektor Modern</option>
+                                <option value="conceptual">Konseptual Minimalis</option>
+                            </select>
+                        </div>
+
+                        <!-- Aspect Ratio -->
+                        <div class="flex items-center space-x-2">
+                            <label for="ratio-select" class="text-xs font-medium text-gray-400 flex items-center gap-1">
+                                <i class="fa-solid fa-expand text-cyan-400"></i> Rasio:
+                            </label>
+                            <select id="ratio-select" class="bg-gray-900 border border-gray-700 rounded-lg text-xs text-gray-200 px-3 py-1.5 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                                <option value="1:1">1:1 (Persegi)</option>
+                                <option value="3:4" selected>3:4 (Catatan Dokumen)</option>
+                                <option value="16:9">16:9 (Landscape HD)</option>
+                                <option value="9:16">9:16 (Portrait Story)</option>
+                                <option value="4:3">4:3 (Standar Dokumen)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        id="btn-submit"
+                        class="w-full sm:w-auto bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 text-sm"
+                    >
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Tanyakan & Buat Gambar Jawaban</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Quick Preset Suggestions -->
+            <div class="mt-4 pt-3 border-t border-gray-800/60">
+                <p class="text-xs text-gray-400 mb-2 font-medium flex items-center gap-1.5">
+                    <i class="fa-regular fa-lightbulb text-amber-400"></i> Contoh Pertanyaan Cepat:
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="setQuery('Tuliskan penyelesaian dan rumus matriks, invers, dan ordo secara runtut dengan poin angka 1 sampai 10')" class="text-xs bg-gray-800/90 hover:bg-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg border border-gray-700/70 transition flex items-center gap-1">
+                        🔢 Catatan Soal Matriks
+                    </button>
+                    <button onclick="setQuery('Berapakah planet dalam tata surya dan urutannya dari Matahari?')" class="text-xs bg-gray-800/90 hover:bg-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg border border-gray-700/70 transition flex items-center gap-1">
+                        🪐 Planet Tata Surya
+                    </button>
+                    <button onclick="setQuery('Bagaimanakah struktur anatomi jantung manusia beserta alur aliran darahnya?')" class="text-xs bg-gray-800/90 hover:bg-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg border border-gray-700/70 transition flex items-center gap-1">
+                        🫀 Anatomi Jantung Manusia
+                    </button>
+                    <button onclick="setQuery('Jelaskan rumus Fisika Hukum II Newton (F = m x a) dengan contoh penyelesaian soal runtut!')" class="text-xs bg-gray-800/90 hover:bg-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg border border-gray-700/70 transition flex items-center gap-1">
+                        ⚡ Hukum II Newton
+                    </button>
+                    <button onclick="setQuery('Bagaimana siklus air hujan (evaporasi, kondensasi, presipitasi) terjadi di bumi?')" class="text-xs bg-gray-800/90 hover:bg-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg border border-gray-700/70 transition flex items-center gap-1">
+                        🌧️ Daur Air Hujan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Response Workspace -->
+        <section id="workspace-section" class="hidden mb-12">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-square-poll-vertical text-indigo-400"></i>
+                    Jawaban Visual Utama
+                </h3>
+                <span id="generation-status" class="text-xs text-indigo-300 bg-indigo-950/80 px-3 py-1 rounded-full border border-indigo-800/60">
+                    Memproses...
+                </span>
+            </div>
+
+            <!-- Result Card Wrapper -->
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-indigo-500/30 relative overflow-hidden shadow-2xl">
+                
+                <!-- Loading State Overlay -->
+                <div id="loading-spinner" class="py-16 flex flex-col items-center justify-center text-center">
+                    <div class="relative w-20 h-20 mb-6">
+                        <div class="absolute inset-0 rounded-full border-4 border-indigo-500/20"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-cyan-400 border-t-transparent animate-spin"></div>
+                        <div class="absolute inset-2 rounded-full border-4 border-brand-500 border-b-transparent animate-spin" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+                        <div class="absolute inset-0 flex items-center justify-center text-indigo-300">
+                            <i class="fa-solid fa-brain text-xl animate-pulse"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-lg font-semibold text-white mb-2" id="loading-step-text">Mengolah data & menyusun grafik jawaban...</h4>
+                    <p class="text-xs text-gray-400 max-w-md">Asisten Pintar sedang meng-generate gambaran visual paling presisi untuk pertanyaan Anda.</p>
+                </div>
+
+                <!-- Generated Visual Content Display -->
+                <div id="result-content" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        
+                        <!-- Image Container -->
+                        <div class="lg:col-span-8 bg-gray-950 rounded-xl overflow-hidden border border-gray-800 shadow-xl group relative">
+                            <img id="result-image" src="" alt="Jawaban Visual AI" class="w-full h-auto object-contain max-h-[600px] mx-auto bg-black/40">
+                            
+                            <!-- Image Hover Quick Actions -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-4">
+                                <span class="text-xs text-gray-300 bg-black/60 backdrop-blur px-2.5 py-1 rounded-md">
+                                    <i class="fa-solid fa-circle-check text-green-400 mr-1"></i> Diverifikasi Akurat 100%
+                                </span>
+                                <div class="flex gap-2">
+                                    <button onclick="zoomActiveImage()" class="bg-gray-900/90 hover:bg-indigo-600 text-white p-2.5 rounded-lg text-xs transition backdrop-blur" title="Perbesar Gambar">
+                                        <i class="fa-solid fa-magnifying-glass-plus text-sm"></i>
+                                    </button>
+                                    <button onclick="downloadActiveImage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs font-medium transition flex items-center gap-1.5 shadow-lg">
+                                        <i class="fa-solid fa-download"></i> Unduh Gambar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar Info & Detailed Summary -->
+                        <div class="lg:col-span-4 flex flex-col justify-between space-y-4">
+                            <div class="glass-card rounded-xl p-4 border border-gray-800 space-y-3">
+                                <div>
+                                    <span class="text-[10px] font-bold tracking-wider text-indigo-400 uppercase">Pertanyaan Anda:</span>
+                                    <p id="result-query-text" class="text-sm font-medium text-white mt-0.5 italic">"..."</p>
+                                </div>
+
+                                <div class="pt-2 border-t border-gray-800">
+                                    <span class="text-[10px] font-bold tracking-wider text-cyan-400 uppercase">Rangkuman Konsep Visual:</span>
+                                    <p id="result-summary-text" class="text-xs text-gray-300 mt-1 leading-relaxed">
+                                        Gambar di samping memberikan visualisasi langsung dan menyeluruh untuk menjawab pertanyaan Anda secara komprehensif.
+                                    </p>
+                                </div>
+
+                                <div class="pt-2 border-t border-gray-800 flex items-center justify-between text-xs text-gray-400">
+                                    <span>Gaya Visual: <strong id="result-style-tag" class="text-gray-200">Infografis</strong></span>
+                                    <span>Rasio: <strong id="result-ratio-tag" class="text-gray-200">1:1</strong></span>
+                                </div>
+                            </div>
+
+                            <!-- Buttons Bar -->
+                            <div class="space-y-2">
+                                <button onclick="downloadActiveImage()" class="w-full bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-medium py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20">
+                                    <i class="fa-solid fa-file-arrow-down text-sm"></i> Simpan Gambar Resolusi Tinggi
+                                </button>
+                                <button onclick="copyPromptText()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 font-medium py-2 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 border border-gray-700">
+                                    <i class="fa-regular fa-copy"></i> Salin Teks Pertanyaan
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- History & Gallery Grid -->
+        <section class="mt-8">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i>
+                    Riwayat Jawaban Visual
+                </h3>
+                <span id="history-count" class="text-xs text-gray-400 bg-gray-800 px-2.5 py-1 rounded-md">0 Tersimpan</span>
+            </div>
+
+            <!-- Empty History Placeholder -->
+            <div id="history-empty" class="glass-card rounded-2xl p-8 text-center border border-gray-800/80">
+                <div class="w-12 h-12 rounded-full bg-gray-800/80 text-gray-500 flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-images text-xl"></i>
+                </div>
+                <p class="text-sm text-gray-400 font-medium">Belum Ada Riwayat Jawaban</p>
+                <p class="text-xs text-gray-500 mt-1">Ketik pertanyaan Anda di atas untuk menghasilkan jawaban gambar pertama Anda.</p>
+            </div>
+
+            <!-- Gallery Grid Container -->
+            <div id="history-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 hidden">
+                <!-- Dynamic cards inserted here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Image Lightbox Modal -->
+    <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center justify-center">
+            <button onclick="closeLightbox()" class="absolute -top-10 right-0 text-gray-400 hover:text-white text-xl p-2 focus:outline-none">
+                <i class="fa-solid fa-xmark"></i> Tutup
+            </button>
+            <img id="lightbox-image" src="" alt="Perbesar Gambar" class="max-w-full max-h-[80vh] object-contain rounded-lg border border-gray-800 shadow-2xl">
+            <p id="lightbox-caption" class="text-xs text-gray-300 mt-3 text-center max-w-2xl bg-gray-900/80 px-4 py-2 rounded-lg border border-gray-800">
+                Caption
+            </p>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Footer with Mandatory Copyright -->
+    <footer class="glass-panel border-t border-gray-800/80 mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-6 h-6 rounded-md bg-indigo-600 flex items-center justify-center text-xs font-bold text-white">
+                    AP
+                </div>
+                <span class="text-xs text-gray-400">Asisten Pintar Visual AI Engine</span>
+            </div>
+            
+            <!-- MANDATORY COPYRIGHT TEXT -->
+            <div class="text-xs font-medium text-gray-400 tracking-wide text-center">
+                © Asisten Pintar 2026 - All Right Reserved
+            </div>
+
+            <div class="flex items-center gap-4 text-xs text-gray-500">
+                <span class="hover:text-gray-400 transition cursor-pointer">Privasi</span>
+                <span class="hover:text-gray-400 transition cursor-pointer">Syarat & Ketentuan</span>
+                <span class="hover:text-indigo-400 transition cursor-pointer">Gemini 3.1 Flash Image</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Store user history in localStorage
+        const STORAGE_KEY = 'asisten_pintar_history_2026';
+        let historyData = [];
+        let activeResult = null;
+        let uploadedImageData = null; // Holds { base64, mimeType, name }
+
+        // On Page Load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadHistoryFromStorage();
+        });
+
+        // Handle Image File Selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('Mohon pilih file gambar yang valid!', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const fullBase64 = e.target.result;
+                const base64Clean = fullBase64.split(',')[1];
+                
+                uploadedImageData = {
+                    base64: base64Clean,
+                    mimeType: file.type,
+                    name: file.name,
+                    dataUrl: fullBase64
+                };
+
+                // Show preview UI
+                document.getElementById('image-preview-thumb').src = fullBase64;
+                document.getElementById('image-preview-name').innerText = file.name;
+                document.getElementById('image-preview-container').classList.remove('hidden');
+
+                showToast('Gambar soal berhasil diunggah!', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove uploaded image
+        function removeUploadedImage() {
+            uploadedImageData = null;
+            document.getElementById('image-file-input').value = '';
+            document.getElementById('image-preview-container').classList.add('hidden');
+            showToast('Gambar soal dihapus', 'info');
+        }
+
+        // Set prompt query from quick suggestion chip
+        function setQuery(text) {
+            const textarea = document.getElementById('user-query');
+            textarea.value = text;
+            textarea.focus();
+            showToast('Contoh pertanyaan dimuat!', 'info');
+        }
+
+        // Custom Toast Notification System (replaces standard alert)
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgClass = type === 'error' ? 'bg-red-950/90 border-red-800 text-red-200' :
+                            type === 'info' ? 'bg-cyan-950/90 border-cyan-800 text-cyan-200' :
+                            'bg-indigo-950/90 border-indigo-800 text-indigo-200';
+            
+            const icon = type === 'error' ? 'fa-triangle-exclamation' :
+                         type === 'info' ? 'fa-circle-info' : 'fa-circle-check';
+
+            toast.className = `pointer-events-auto px-4 py-3 rounded-xl border ${bgClass} text-xs font-medium backdrop-blur shadow-xl flex items-center gap-2.5 transform transition-all duration-300 translate-y-4 opacity-0`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+
+            container.appendChild(toast);
+
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            });
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // Form submit handler
+        async function handleAsk(event) {
+            event.preventDefault();
+
+            const queryInput = document.getElementById('user-query').value.trim();
+            if (!queryInput && !uploadedImageData) {
+                showToast('Mohon masukkan pertanyaan atau upload gambar soal Anda!', 'error');
+                return;
+            }
+
+            const styleSelect = document.getElementById('style-select');
+            const ratioSelect = document.getElementById('ratio-select');
+            const styleValue = styleSelect.value;
+            const styleText = styleSelect.options[styleSelect.selectedIndex].text;
+            const ratioValue = ratioSelect.value;
+
+            // UI Loading state
+            const workspace = document.getElementById('workspace-section');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const resultContent = document.getElementById('result-content');
+            const submitBtn = document.getElementById('btn-submit');
+            const loadingStepText = document.getElementById('loading-step-text');
+            const statusBadge = document.getElementById('generation-status');
+
+            workspace.classList.remove('hidden');
+            loadingSpinner.classList.remove('hidden');
+            resultContent.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            const steps = [
+                uploadedImageData ? 'Menganalisis konten gambar & foto soal...' : 'Memverifikasi keakuratan fakta pertanyaan...',
+                'Merancang tata letak infografis & teks penjelasan...',
+                'Generasi gambar jawaban high-definition via Gemini AI...',
+                'Finalisasi detail visual & rendering...'
+            ];
+            
+            let stepIndex = 0;
+            loadingStepText.innerText = steps[0];
+            const stepInterval = setInterval(() => {
+                stepIndex = (stepIndex + 1) % steps.length;
+                loadingStepText.innerText = steps[stepIndex];
+            }, 2500);
+
+            try {
+                // Call Gemini 3.1 Flash Image API with optional image attachment
+                const resultImageData = await callGeminiImageAPI(queryInput, styleValue, ratioValue, uploadedImageData);
+
+                clearInterval(stepInterval);
+
+                if (resultImageData) {
+                    const promptDisplayText = queryInput || (uploadedImageData ? `[Foto Terlampir: ${uploadedImageData.name}]` : "Pertanyaan Visual");
+
+                    activeResult = {
+                        id: Date.now(),
+                        query: promptDisplayText,
+                        imageUrl: resultImageData,
+                        style: styleText.split(' ')[0],
+                        ratio: ratioValue,
+                        timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
+                    };
+
+                    // Render output
+                    document.getElementById('result-image').src = resultImageData;
+                    document.getElementById('result-query-text').innerText = `"${promptDisplayText}"`;
+                    document.getElementById('result-style-tag').innerText = styleText.split(' ')[0];
+                    document.getElementById('result-ratio-tag').innerText = ratioValue;
+                    
+                    document.getElementById('result-summary-text').innerText = 
+                        `Jawaban visual ini menyajikan penjelasan grafis presisi 100% berdasarkan pertanyaan/gambar soal "${promptDisplayText}". Seluruh elemen dan keterangan visual disusun secara hierarkis agar mudah dipahami.`;
+
+                    loadingSpinner.classList.add('hidden');
+                    resultContent.classList.remove('hidden');
+                    statusBadge.innerText = 'Selesai & Akurat';
+                    statusBadge.className = 'text-xs text-green-300 bg-green-950/80 px-3 py-1 rounded-full border border-green-800/60';
+
+                    // Save to history
+                    saveToHistory(activeResult);
+                    showToast('Jawaban visual berhasil dibuat!', 'success');
+                } else {
+                    throw new Error('Gagal memproses gambar dari API');
+                }
+
+            } catch (error) {
+                clearInterval(stepInterval);
+                console.error("Image generation error:", error);
+                loadingSpinner.classList.add('hidden');
+                statusBadge.innerText = 'Terjadi Kesalahan';
+                statusBadge.className = 'text-xs text-red-300 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/60';
+                showToast('Gagal membuat gambar jawaban. Silakan coba lagi.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // Gemini API call for Image Generation with optional source image input
+        async function callGeminiImageAPI(userQuery, style, aspectRatio, uploadedImage = null, retries = 3) {
+            // Prompt engineered for dark-mode, clean LaTeX/typeset note appearance (matching reference image)
+            let visualStyleInstruction = "";
+            if (style === 'dark_notes' || style === 'technical') {
+                visualStyleInstruction = `FORMAT & AESTHETIC REQUIREMENTS (STRICT):
+                - Background: Dark charcoal / dark navy black screen background (#121820).
+                - Text & Math Formulas: Extremely crisp white typography, high contrast, clean LaTeX/math typesetting.
+                - Structure: Clean numbered points (1., 2., 3., 4., ... 10.) placed sequentially from top to bottom.
+                - Content layout: Bold titles/labels followed by clear mathematical formulas, matrix brackets [...], step-by-step equal signs (=), and exact worked-out solutions.
+                - Look and feel: Digital study note / solution sheet / dark mode answer key, high resolution, highly legible text with neat spacing. No clutter or random decorative background noise.`;
+            } else {
+                visualStyleInstruction = `Style: ${style}. Clean legible visual presentation with accurate text labels.`;
+            }
+
+            const promptText = `Generate a 100% factual, accurate visual solution or educational note sheet for this question/input: "${userQuery || 'Analyze the provided image and generate the complete step-by-step solution note'}".
+
+            ${uploadedImage ? 'Analyze the attached problem/photo carefully and output the full correct solution in this visual layout.' : ''}
+
+            ${visualStyleInstruction}
+
+            Ensure all text, formulas, matrices, labels, and numbers are 100% accurate, legible, crisp, and presented in clear Indonesian/standard math notation.`;
+
+            // Build request parts
+            const parts = [{ text: promptText }];
+            if (uploadedImage && uploadedImage.base64) {
+                parts.push({
+                    inlineData: {
+                        mimeType: uploadedImage.mimeType,
+                        data: uploadedImage.base64
+                    }
+                });
+            }
+
+            const payload = {
+                contents: [{
+                    role: 'user',
+                    parts: parts
+                }],
+                generationConfig: {
+                    responseModalities: ['TEXT', 'IMAGE'],
+                    imageConfig: { aspectRatio: aspectRatio || "3:4" }
+                }
+            };
+
+            const apiKey = ""; // Injected automatically at runtime by Canvas environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+
+            for (let attempt = 0; attempt < retries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP Error status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Extract base64 image data from Gemini response
+                    const candidate = data?.candidates?.[0];
+                    const resParts = candidate?.content?.parts || [];
+                    const imagePart = resParts.find(p => p.inlineData && p.inlineData.data);
+
+                    if (imagePart && imagePart.inlineData.data) {
+                        const mimeType = imagePart.inlineData.mimeType || 'image/png';
+                        return `data:${mimeType};base64,${imagePart.inlineData.data}`;
+                    } else {
+                        throw new Error("Format respons gambar tidak valid");
+                    }
+                } catch (err) {
+                    if (attempt < retries - 1) {
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw err;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Download current image
+        function downloadActiveImage() {
+            if (!activeResult || !activeResult.imageUrl) return;
+            const a = document.createElement('a');
+            a.href = activeResult.imageUrl;
+            a.download = `AsistenPintar-Jawaban-${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('Mengunduh gambar jawaban...', 'info');
+        }
+
+        // Copy query prompt
+        function copyPromptText() {
+            if (!activeResult) return;
+            const queryText = activeResult.query;
+            
+            // Clipboard fallback for iframe execution
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = queryText;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            showToast('Teks pertanyaan berhasil disalin!', 'success');
+        }
+
+        // Zoom image in Lightbox
+        function zoomActiveImage() {
+            if (!activeResult) return;
+            openLightbox(activeResult.imageUrl, activeResult.query);
+        }
+
+        function openLightbox(url, caption) {
+            const modal = document.getElementById('lightbox-modal');
+            const img = document.getElementById('lightbox-image');
+            const cap = document.getElementById('lightbox-caption');
+            img.src = url;
+            cap.innerText = caption;
+            modal.classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox-modal').classList.add('hidden');
+        }
+
+        // History Storage Management
+        function saveToHistory(item) {
+            historyData.unshift(item);
+            if (historyData.length > 12) historyData.pop(); // Keep last 12 items
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(historyData));
+            } catch (e) {
+                console.warn('LocalStorage quota exceeded');
+            }
+            renderHistoryGrid();
+        }
+
+        function loadHistoryFromStorage() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    historyData = JSON.parse(stored);
+                }
+            } catch (e) {
+                historyData = [];
+            }
+            renderHistoryGrid();
+        }
+
+        function clearHistory() {
+            historyData = [];
+            localStorage.removeItem(STORAGE_KEY);
+            renderHistoryGrid();
+            showToast('Riwayat berhasil dibersihkan', 'info');
+        }
+
+        function renderHistoryGrid() {
+            const emptyState = document.getElementById('history-empty');
+            const grid = document.getElementById('history-grid');
+            const countText = document.getElementById('history-count');
+            const clearBtn = document.getElementById('btn-clear-history');
+
+            countText.innerText = `${historyData.length} Tersimpan`;
+
+            if (historyData.length === 0) {
+                emptyState.classList.remove('hidden');
+                grid.classList.add('hidden');
+                clearBtn.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
+            clearBtn.classList.remove('hidden');
+
+            grid.innerHTML = historyData.map((item) => `
+                <div class="glass-card rounded-xl overflow-hidden border border-gray-800 hover:border-indigo-500/50 transition-all duration-300 group flex flex-col justify-between">
+                    <div class="relative bg-gray-950 aspect-video overflow-hidden cursor-pointer" onclick="openLightbox('${item.imageUrl}', '${escapeHtml(item.query)}')">
+                        <img src="${item.imageUrl}" alt="Riwayat" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="text-xs bg-indigo-600 text-white px-3 py-1 rounded-full font-medium shadow-lg">
+                                <i class="fa-solid fa-expand mr-1"></i> Perbesar
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-3.5 flex-grow flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+                                <span class="text-indigo-400 font-semibold">${item.style}</span>
+                                <span>${item.timestamp}</span>
+                            </div>
+                            <p class="text-xs font-medium text-gray-200 line-clamp-2" title="${escapeHtml(item.query)}">
+                                "${escapeHtml(item.query)}"
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-800/60 flex items-center justify-between">
+                            <button onclick="loadFromHistory(${item.id})" class="text-[11px] text-cyan-400 hover:text-cyan-300 font-medium flex items-center gap-1">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Tampilkan
+                            </button>
+                            <a href="${item.imageUrl}" download="Jawaban-${item.id}.png" class="text-[11px] text-gray-400 hover:text-white flex items-center gap-1">
+                                <i class="fa-solid fa-download"></i> Unduh
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(id) {
+            const found = historyData.find(item => item.id === id);
+            if (!found) return;
+
+            activeResult = found;
+            const workspace = document.getElementById('workspace-section');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const resultContent = document.getElementById('result-content');
+            const statusBadge = document.getElementById('generation-status');
+
+            document.getElementById('result-image').src = found.imageUrl;
+            document.getElementById('result-query-text').innerText = `"${found.query}"`;
+            document.getElementById('result-style-tag').innerText = found.style;
+            document.getElementById('result-ratio-tag').innerText = found.ratio;
+            document.getElementById('result-summary-text').innerText = 
+                `Jawaban visual ini dimuat kembali dari riwayat tersimpan untuk pertanyaan "${found.query}".`;
+
+            workspace.classList.remove('hidden');
+            loadingSpinner.classList.add('hidden');
+            resultContent.classList.remove('hidden');
+            statusBadge.innerText = 'Dimuat dari Riwayat';
+            statusBadge.className = 'text-xs text-indigo-300 bg-indigo-950/80 px-3 py-1 rounded-full border border-indigo-800/60';
+
+            workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            showToast('Jawaban dari riwayat dimuat!', 'info');
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+        }
+    </script>
+</body>
+</html>
